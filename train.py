@@ -3,8 +3,18 @@ import torch
 import torch.nn as nn
 from torch.nn.utils.rnn import pad_sequence
 import numpy as np
+import wandb
 
-df = pd.read_pickle("archive/games_prepared_sample.pkl")
+wandb.init(project="chess_elo_prediction", config={
+    "learning_rate": 1e-3,
+    "batch_size": 32,
+    "embed_dim": 64,
+    "hidden_dim": 64,
+    "n_layers": 1
+})
+
+df = pd.read_pickle("archive/games_train.pkl")
+print("using ", len(df), " games for training")
 vocab_size = max(max(seq) for seq in df["moves_encoded"]) + 1
 
 class ChessModel(nn.Module):
@@ -28,12 +38,18 @@ ratings = torch.tensor(df[["black_rating_scaled", "white_rating_scaled"]].values
 winner = torch.tensor(df["winner_encoded"].values, dtype=torch.float)
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-model = ChessModel(vocab_size=vocab_size).to(device)
+model = ChessModel(vocab_size=vocab_size,
+                   embed_dim=wandb.config.embed_dim,
+                   hidden_dim=wandb.config.hidden_dim,
+                   n_layers=wandb.config.n_layers).to(device)
+
 criterion_mse = nn.MSELoss()
 criterion_bce = nn.BCEWithLogitsLoss()
-optimizer = torch.optim.Adam(model.parameters(), lr=1e-3)
+optimizer = torch.optim.Adam(model.parameters(), lr=wandb.config.learning_rate)
 
-batch_indices = np.random.choice(len(X), size=32, replace=False)
+wandb.watch(model, log="all")
+
+batch_indices = np.random.choice(len(X), size=wandb.config.batch_size, replace=False)
 X_batch = X[batch_indices].to(device)
 ratings_batch = ratings[batch_indices].to(device)
 winner_batch = winner[batch_indices].to(device)
@@ -48,8 +64,16 @@ loss.backward()
 optimizer.step()
 
 torch.save(model.state_dict(), "model.pth")
-print("Model saved!")
 
+wandb.log({
+    "loss_ratings": loss_ratings.item(),
+    "loss_winner": loss_winner.item(),
+    "loss_total": loss.item()
+})
+
+wandb.finish()
+
+print("Model saved!")
 print("--- Results ---")
 print("Loss ratings:", loss_ratings.item())
 print("Loss winner:", loss_winner.item())

@@ -1,0 +1,4 @@
+archive/games_train/
+archive/games_test/
+archive/games_val/
+wandb/
