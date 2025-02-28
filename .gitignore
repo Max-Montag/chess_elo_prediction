@@ -1,5 +1,5 @@
-archive/games_train/
-archive/games_test/
-archive/games_val/
+data/games_train/
+data/games_test/
+data/games_val/
 wandb/
 models/
