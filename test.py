@@ -42,7 +42,7 @@ if use_model_no is None:
         print("No model found for this config!")
         exit()
 else:
-    model.load_state_dict(torch.load(f"models/model_{use_config['name']}_{use_model_no}.pth"))
+    model.load_state_dict(torch.load(f"models/model_{use_config['name']}_{use_model_no}.pth", weights_only=True))
 
 # forward test
 model.eval()
@@ -51,16 +51,17 @@ dataset = TensorDataset(X, ratings)
 data_loader = DataLoader(dataset, batch_size=1, shuffle=True)
 
 loss = 0.0
-accuracy = 0
+percentage_error = 0.0
 for X_batch, ratings_batch in data_loader:
     X_batch = X_batch.to(device)
     ratings_batch = ratings_batch.to(device)
     pred_ratings = model(X_batch)
     new_loss = criterion_mse(pred_ratings, ratings_batch)
     loss += new_loss.item()
-    accuracy += torch.sum(torch.abs(pred_ratings - ratings_batch) < 100).item()
+    percentage_error += torch.mean(torch.abs(pred_ratings - ratings_batch) / ratings_batch).item()
+
 avg_loss = loss / len(data_loader)
-accuracy = accuracy / len(df)
+accuracy = 1 - percentage_error / len(data_loader)
 wandb.log({"loss_total": avg_loss, "accuracy": accuracy})
 print("Accuracy: ", accuracy)
 print("Average loss: ", avg_loss)
