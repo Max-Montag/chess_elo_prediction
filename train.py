@@ -4,19 +4,25 @@ import torch
 import torch.nn as nn
 from torch.utils.data import DataLoader, TensorDataset
 from torch.nn.utils.rnn import pad_sequence
+from sklearn.model_selection import train_test_split
 import wandb
 from chess_model import ChessModel
 from configs import *
+from masking import mask_batch
 
 current_config = config_a
-
 wandb.init(project="chess-rating-prediction", config=current_config)
 
-df = pd.read_pickle("data/games_train.pkl")
-df_val = pd.read_pickle("data/games_val.pkl")
+data = pd.read_pickle("data/games_prepared.pkl")
 
-print("using ", len(df), " games for training")
-print("using ", len(df_val), " games for validation")
+df, temp_df = train_test_split(data, test_size=0.2, random_state=wandb.config.seed)
+test_df, df_val = train_test_split(temp_df, test_size=0.2, random_state=wandb.config.seed)
+
+test_df.to_pickle("data/games_test.pkl")
+
+print(f"Train set size: {len(df)}")
+print(f"Test set size: {len(test_df)}")
+print(f"Validation set size: {len(df_val)}")
 
 sequences = [torch.tensor(seq, dtype=torch.long) for seq in df["moves_encoded"]]
 X = pad_sequence(sequences, batch_first=True, padding_value=0)
@@ -43,10 +49,10 @@ data_loader = DataLoader(dataset, batch_size=wandb.config.batch_size, shuffle=Tr
 val_dataset = TensorDataset(X_val, ratings_val)
 val_data_loader = DataLoader(val_dataset, batch_size=wandb.config.batch_size, shuffle=True)
 
-# train loop
 for epoch in range(wandb.config.num_epochs):
     loss = 0.0
     for X_batch, ratings_batch in data_loader:
+        X_batch = mask_batch(X_batch, wandb.config.mask_prob, wandb.config.mask_token)
         X_batch = X_batch.to(device)
         ratings_batch = ratings_batch.to(device)
         model.train()
@@ -58,8 +64,6 @@ for epoch in range(wandb.config.num_epochs):
         loss += new_loss.item()
     avg_loss = loss / len(data_loader)
     wandb.log({"loss_total": avg_loss})
-
-    # validation
     loss_val = 0.0
     percentage_error_sum = 0
     for X_batch, ratings_batch in val_data_loader:
@@ -74,11 +78,10 @@ for epoch in range(wandb.config.num_epochs):
     wandb.log({"loss_val": loss_val / len(val_data_loader), "percentage_error": avg_percentage_error})
     print(f"Epoch {epoch} - loss: {avg_loss}, val_loss: {loss_val / len(val_data_loader)}, percentage_error: {avg_percentage_error}")
 
-# save model
 i = 0
 while os.path.exists(f"models/model_{wandb.config.name}_{i}.pth"):
     i += 1
 torch.save(model.state_dict(), f"models/model_{wandb.config.name}_{i}.pth")
-print (f"Model saved as model_{wandb.config.name}_{i}.pth")
+print(f"Model saved as model_{wandb.config.name}_{i}.pth")
 
 wandb.finish()
