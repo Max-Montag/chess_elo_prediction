@@ -7,5 +7,4 @@ def mask_batch(batch, mask_prob, mask_token):
     rand = torch.rand_like(batch, dtype=torch.float)
     mask = (rand < mask_prob) & (batch != 0)
     masked[mask] = mask_token
-    print("masked ", mask.sum().item(), " tokens")
     return masked
