@@ -1,5 +1,4 @@
-data/games_train/
-data/games_test/
-data/games_val/
+data/
 wandb/
 models/
+data/

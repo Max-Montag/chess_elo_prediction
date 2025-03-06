@@ -1,12 +1,11 @@
 import os
-
+import ast
 import pandas as pd
 import torch
 import torch.nn as nn
 from sklearn.model_selection import train_test_split
 from torch.nn.utils.rnn import pad_sequence
 from torch.utils.data import DataLoader, TensorDataset
-
 import wandb
 from chess_model import ChessModel
 from configs import *
@@ -15,22 +14,24 @@ from masking import mask_batch
 current_config = config_a
 wandb.init(project="chess-rating-prediction", config=current_config)
 
-data = pd.read_pickle("data/games_prepared.pkl")
+# data = pd.read_pickle("data/games_prepared.pkl")
+data = pd.read_csv("data/split_data_prepared/set_1_normalized.csv")
+data = data.sample(n=200000, random_state=wandb.config.seed).reset_index(drop=True)
 
 df, temp_df = train_test_split(data, test_size=0.2, random_state=wandb.config.seed)
 test_df, df_val = train_test_split(temp_df, test_size=0.2, random_state=wandb.config.seed)
 
-test_df.to_pickle("data/games_test.pkl")
+# test_df.to_pickle("data/games_test.pkl")
 
 print(f"Train set size: {len(df)}")
 print(f"Test set size: {len(test_df)}")
 print(f"Validation set size: {len(df_val)}")
 
-sequences = [torch.tensor(seq, dtype=torch.long) for seq in df["moves_encoded"]]
+sequences = [torch.tensor(ast.literal_eval(seq), dtype=torch.long) for seq in df["moves_encoded"]]
 X = pad_sequence(sequences, batch_first=True, padding_value=0)
 ratings = torch.tensor(df[["black_rating_scaled", "white_rating_scaled"]].values, dtype=torch.float)
 
-sequences_val = [torch.tensor(seq, dtype=torch.long) for seq in df_val["moves_encoded"]]
+sequences_val = [torch.tensor(ast.literal_eval(seq), dtype=torch.long) for seq in df_val["moves_encoded"]]
 X_val = pad_sequence(sequences_val, batch_first=True, padding_value=0)
 ratings_val = torch.tensor(df_val[["black_rating_scaled", "white_rating_scaled"]].values, dtype=torch.float)
 
