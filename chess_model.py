@@ -23,18 +23,17 @@ class ChessModel(nn.Module):
         self.embed = nn.Embedding(vocab_size, embed_dim)
         self.dropout = nn.Dropout(dropout)
         self.positional_encoding = PositionalEncoding(embed_dim, dropout)
-        self.encoder_layer = nn.TransformerEncoderLayer(d_model=embed_dim, nhead=nhead, dropout=dropout, batch_first=False)
+        self.encoder_layer = nn.TransformerEncoderLayer(d_model=embed_dim, nhead=nhead, dropout=dropout, batch_first=True)
         self.transformer_encoder = nn.TransformerEncoder(self.encoder_layer, num_layers=n_layers)
-        self.lstm = nn.LSTM(embed_dim, hidden_dim, num_layers=n_layers, batch_first=False, dropout=dropout)
+        self.lstm = nn.LSTM(embed_dim, hidden_dim, num_layers=n_layers, batch_first=True, dropout=dropout)
         self.fc_rating = nn.Linear(hidden_dim, 1)
+
     def forward(self, x):
         x = self.embed(x)
         x = self.dropout(x)
         x = self.positional_encoding(x)
-        x = x.transpose(0, 1)
         x = self.transformer_encoder(x)
         x, _ = self.lstm(x)
         x = self.dropout(x)
-        x = x.transpose(0, 1)
         ratings = self.fc_rating(x)
         return ratings

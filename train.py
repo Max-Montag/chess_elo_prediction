@@ -71,14 +71,16 @@ for epoch in range(wandb.config.num_epochs):
         pred_ratings = model(X_batch)
 
         seq_len = pred_ratings.shape[1]
-        weights = torch.linspace(0.1, 1.0, steps=seq_len).to(device) # higher weight for later predictions!
-        weights = weights.unsqueeze(0).unsqueeze(-1)
+        # weights = torch.linspace(0.1, 1.0, steps=seq_len).to(device) # higher weight for later predictions!
+        # weights = weights.unsqueeze(0).unsqueeze(-1)
 
         loss = criterion_mse(pred_ratings, ratings_batch.unsqueeze(1).expand_as(pred_ratings))
-        weighted_loss = (loss * weights).mean()
-        weighted_loss.backward()
+        # weighted_loss = (loss * weights).mean()
+        # weighted_loss.backward()
+        loss.backward()
         optimizer.step()
-        loss += weighted_loss.item()
+        # loss += weighted_loss.item()
+        loss += loss.item()
     avg_loss = loss / len(data_loader)
     wandb.log({"loss_total": avg_loss})
 
