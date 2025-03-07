@@ -25,29 +25,32 @@ model = ChessModel(vocab_size=wandb.config.vocab_size,
                    ).to(device)
 # wandb.watch(model, log="all")
 criterion_mse = nn.MSELoss()
-optimizer = torch.optim.Adam(model.parameters(), lr=wandb.config.learning_rate)
+optimizer = torch.optim.Adam(model.parameters(), lr=wandb.config.learning_rate, weight_decay=wandb.config.weight_decay)
+
+# data = data_full.sample(n=wandb.config.dataset_size, random_state=wandb.config.seed).reset_index(drop=True)
+df, df_val = train_test_split(data_full, test_size=0.01, random_state=wandb.config.seed)  # USE SET 5 FOR TESTING!
+
+sequences_val = [torch.tensor(ast.literal_eval(seq), dtype=torch.long) for seq in df_val["moves_encoded"]]
+X_val = pad_sequence(sequences_val, batch_first=True, padding_value=0)
+ratings_val = torch.tensor(df_val["white_rating_scaled"].values, dtype=torch.float).unsqueeze(1)
+
+val_dataset = TensorDataset(X_val, ratings_val)
+val_data_loader = DataLoader(val_dataset, batch_size=wandb.config.batch_size, shuffle=True)
 
 def reload_data(data_full, seed):
-    data = data_full.sample(n=200000, random_state=seed).reset_index(drop=True)
-    df, df_val = train_test_split(data, test_size=0.2, random_state=seed)  # USE SET 5 FOR TESTING!
+    print("Reloading data with seed ", seed)
+    data = data_full.sample(n=wandb.config.dataset_size, random_state=seed).reset_index(drop=True)
 
-    sequences = [torch.tensor(ast.literal_eval(seq), dtype=torch.long) for seq in df["moves_encoded"]]
+    sequences = [torch.tensor(ast.literal_eval(seq), dtype=torch.long) for seq in data["moves_encoded"]]
     X = pad_sequence(sequences, batch_first=True, padding_value=0)
-    ratings = torch.tensor(df[["black_rating_scaled", "white_rating_scaled"]].values, dtype=torch.float)
-
-    sequences_val = [torch.tensor(ast.literal_eval(seq), dtype=torch.long) for seq in df_val["moves_encoded"]]
-    X_val = pad_sequence(sequences_val, batch_first=True, padding_value=0)
-    ratings_val = torch.tensor(df_val[["black_rating_scaled", "white_rating_scaled"]].values, dtype=torch.float)
+    ratings = torch.tensor(data["white_rating_scaled"].values, dtype=torch.float).unsqueeze(1)
 
     dataset = TensorDataset(X, ratings)
     data_loader = DataLoader(dataset, batch_size=wandb.config.batch_size, shuffle=True)
 
-    val_dataset = TensorDataset(X_val, ratings_val)
-    val_data_loader = DataLoader(val_dataset, batch_size=wandb.config.batch_size, shuffle=True)
+    return data_loader
 
-    return data_loader, val_data_loader, ratings_val
-
-data_loader, val_data_loader, ratings_val = reload_data(data_full, wandb.config.seed)
+data_loader = reload_data(data_full, wandb.config.seed)
 
 best_val_loss = float('inf')
 patience = wandb.config.patience
@@ -56,7 +59,7 @@ epochs_without_improvement = 0
 # train loop
 for epoch in range(wandb.config.num_epochs):
     if epochs_without_improvement >= patience:
-        data_loader, val_data_loader, ratings_val = reload_data(data_full, wandb.config.seed + epoch)
+        data_loader = reload_data(data_full, wandb.config.seed + epoch)
         epochs_without_improvement = 0
 
     loss = 0.0
@@ -96,7 +99,7 @@ for epoch in range(wandb.config.num_epochs):
     avg_percentage_error = percentage_error_sum / ratings_val.numel()
     avg_val_loss = loss_val / len(val_data_loader)
     wandb.log({"loss_val": avg_val_loss, "percentage_error": avg_percentage_error})
-    print(f"Epoch {epoch} - loss: {avg_loss}, val_loss: {avg_val_loss}, percentage_error: {avg_percentage_error}")
+    print(f"Epoch {epoch} - loss: {avg_loss*100:.2f}, val_loss: {avg_val_loss*100:.2f}, percentage_error: {avg_percentage_error:.2f}")
 
     if avg_val_loss < best_val_loss:
         best_val_loss = avg_val_loss

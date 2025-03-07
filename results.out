@@ -1,0 +1,200 @@
+# first stable training process:
+{
+  "name": {
+    "value": "a"
+  },
+  "seed": {
+    "value": 16
+  },
+  "_wandb": {
+    "value": {
+      "m": [],
+      "t": {
+        "1": [
+          1,
+          5,
+          53,
+          55
+        ],
+        "2": [
+          1,
+          5,
+          53,
+          55
+        ],
+        "3": [
+          2,
+          16,
+          23,
+          55
+        ],
+        "4": "3.13.2",
+        "5": "0.19.7.dev1",
+        "8": [
+          3,
+          5
+        ],
+        "12": "0.19.7.dev1",
+        "13": "windows-amd64"
+      },
+      "cli_version": "0.19.7.dev1",
+      "python_version": "3.13.2"
+    }
+  },
+  "dropout": {
+    "value": 0.5
+  },
+  "n_layers": {
+    "value": 1
+  },
+  "patience": {
+    "value": 5
+  },
+  "embed_dim": {
+    "value": 64
+  },
+  "mask_prob": {
+    "value": 0.5
+  },
+  "batch_size": {
+    "value": 64
+  },
+  "hidden_dim": {
+    "value": 64
+  },
+  "mask_token": {
+    "value": 11116
+  },
+  "num_epochs": {
+    "value": 100
+  },
+  "vocab_size": {
+    "value": 11117
+  },
+  "dataset_size": {
+    "value": 40000
+  },
+  "learning_rate": {
+    "value": 0.000001
+  }
+}
+
+Reloading data with seed  16
+Epoch 0 - loss: 0.0003765482397284359, val_loss: 0.10458718311786652, percentage_error: 53.8444049987793
+Epoch 1 - loss: 0.0002657616278156638, val_loss: 0.05847819298505783, percentage_error: 38.437885498046874
+Epoch 2 - loss: 0.00021793828636873513, val_loss: 0.028884751811623574, percentage_error: 24.86086131286621
+Epoch 3 - loss: 0.00017585755267646164, val_loss: 0.01298847734183073, percentage_error: 15.444811782836915
+Epoch 4 - loss: 0.00013889958790969104, val_loss: 0.007519555255770683, percentage_error: 12.414700225830078
+Epoch 5 - loss: 0.000148968436405994, val_loss: 0.008220135416835547, percentage_error: 13.930915130615235
+Epoch 6 - loss: 0.0001368848024867475, val_loss: 0.010818985372781753, percentage_error: 16.565681289672852
+Epoch 7 - loss: 0.0001085727199097164, val_loss: 0.012841987866908312, percentage_error: 18.346950927734376
+Epoch 8 - loss: 0.00011075744987465441, val_loss: 0.013836532264947892, percentage_error: 19.17252392578125
+Epoch 9 - loss: 0.00010585523705231026, val_loss: 0.01425977848470211, percentage_error: 19.51616802215576
+Reloading data with seed  26
+Epoch 10 - loss: 0.00010615862265694886, val_loss: 0.0145410630479455, percentage_error: 19.742249855041504
+Epoch 11 - loss: 9.509950905339792e-05, val_loss: 0.014671564921736718, percentage_error: 19.84660890197754
+Epoch 12 - loss: 8.787550905253738e-05, val_loss: 0.014728164330124855, percentage_error: 19.891859466552734
+Epoch 13 - loss: 8.652034739498049e-05, val_loss: 0.014535697780549526, percentage_error: 19.73859104156494
+Epoch 14 - loss: 7.837932207621634e-05, val_loss: 0.014582269579172134, percentage_error: 19.77600566864014
+Reloading data with seed  31
+Epoch 15 - loss: 7.323698082473129e-05, val_loss: 0.014497164987027645, percentage_error: 19.708145195007326
+Epoch 16 - loss: 6.564477371284738e-05, val_loss: 0.014447359994053841, percentage_error: 19.668437255859374
+Epoch 17 - loss: 6.42051818431355e-05, val_loss: 0.014049031533300877, percentage_error: 19.347282516479492
+Epoch 18 - loss: 6.591137207578868e-05, val_loss: 0.013749751426279546, percentage_error: 19.103702491760252
+Epoch 19 - loss: 6.082892286940478e-05, val_loss: 0.013379330195486545, percentage_error: 18.798884887695312
+Reloading data with seed  36
+Epoch 20 - loss: 5.93284385104198e-05, val_loss: 0.013047395072877407, percentage_error: 18.522806449890137
+Epoch 21 - loss: 6.040887092240155e-05, val_loss: 0.012982151068747044, percentage_error: 18.468377388000487
+Epoch 22 - loss: 6.341777771012858e-05, val_loss: 0.012639192134141922, percentage_error: 18.17816683959961
+Epoch 23 - loss: 5.6788652727846056e-05, val_loss: 0.01235763494670391, percentage_error: 17.937226951599122
+Epoch 24 - loss: 5.38066633453127e-05, val_loss: 0.012078902669250964, percentage_error: 17.69685629272461
+Reloading data with seed  41
+Epoch 25 - loss: 5.8977206208510324e-05, val_loss: 0.011748773403465747, percentage_error: 17.407774627685548
+Epoch 26 - loss: 5.831411908729933e-05, val_loss: 0.011540890030562878, percentage_error: 17.223963638305666
+Epoch 27 - loss: 4.933612945023924e-05, val_loss: 0.01127488186955452, percentage_error: 16.985628326416016
+Epoch 28 - loss: 4.993923721485771e-05, val_loss: 0.011150017783045769, percentage_error: 16.873134803771972
+Epoch 29 - loss: 5.6919008784461766e-05, val_loss: 0.01080619453638792, percentage_error: 16.560535598754882
+Reloading data with seed  46
+Epoch 30 - loss: 4.377421282697469e-05, val_loss: 0.010847301196306943, percentage_error: 16.59857823944092
+Epoch 31 - loss: 4.7847053792793304e-05, val_loss: 0.010570187978446484, percentage_error: 16.342811294555663
+Epoch 32 - loss: 4.160928801866248e-05, val_loss: 0.010396901309490204, percentage_error: 16.180673118591308
+Epoch 33 - loss: 4.010502016171813e-05, val_loss: 0.01029209901764989, percentage_error: 16.08181318664551
+Epoch 34 - loss: 4.985738996765576e-05, val_loss: 0.009984977301210165, percentage_error: 15.788363990783692
+Reloading data with seed  51
+Epoch 35 - loss: 3.7893794797128066e-05, val_loss: 0.009980114329606295, percentage_error: 15.783975311279297        
+Epoch 36 - loss: 4.507599805947393e-05, val_loss: 0.009877990152686835, percentage_error: 15.68562043762207
+Epoch 37 - loss: 3.7002217140980065e-05, val_loss: 0.009771688796579837, percentage_error: 15.582487922668458        
+Epoch 38 - loss: 4.46462508989498e-05, val_loss: 0.009643347170203924, percentage_error: 15.456854080200195
+Epoch 39 - loss: 4.328398790676147e-05, val_loss: 0.009529116801917552, percentage_error: 15.343936393737794
+Reloading data with seed  56
+Epoch 40 - loss: 4.00801254727412e-05, val_loss: 0.009388993345201015, percentage_error: 15.203932342529297
+Epoch 41 - loss: 4.2841071262955666e-05, val_loss: 0.009310974176973104, percentage_error: 15.125222892761231        
+Epoch 42 - loss: 3.7481539038708434e-05, val_loss: 0.00914377461746335, percentage_error: 14.953626899719238
+Epoch 43 - loss: 3.959183595725335e-05, val_loss: 0.009131868485361338, percentage_error: 14.941512062072754
+Epoch 44 - loss: 3.91996800317429e-05, val_loss: 0.009119213521480561, percentage_error: 14.928605056762695
+Reloading data with seed  61
+Epoch 45 - loss: 3.227977140340954e-05, val_loss: 0.008931538973003627, percentage_error: 14.73170644378662
+Epoch 46 - loss: 3.3678948966553435e-05, val_loss: 0.00883859783038497, percentage_error: 14.633234031677246
+Epoch 47 - loss: 3.63102117262315e-05, val_loss: 0.00881783939152956, percentage_error: 14.611338569641113
+Epoch 48 - loss: 3.8677611883031204e-05, val_loss: 0.008767183024436236, percentage_error: 14.557257095336913        
+Epoch 49 - loss: 3.34742981067393e-05, val_loss: 0.008703133322298526, percentage_error: 14.488404350280762
+Reloading data with seed  66
+Epoch 50 - loss: 2.9421460567391478e-05, val_loss: 0.008612099632620811, percentage_error: 14.389304450988769        
+Epoch 51 - loss: 3.668250428745523e-05, val_loss: 0.00861277723312378, percentage_error: 14.390245376586915
+Epoch 52 - loss: 3.3532229281263426e-05, val_loss: 0.008490655455738306, percentage_error: 14.255229362487793        
+Epoch 53 - loss: 3.2820429623825476e-05, val_loss: 0.00849058261141181, percentage_error: 14.255328552246095
+Epoch 54 - loss: 2.9649838324985467e-05, val_loss: 0.008520870991051198, percentage_error: 14.289232261657714        
+Reloading data with seed  71
+Epoch 55 - loss: 2.8307595130172558e-05, val_loss: 0.008468702677637338, percentage_error: 14.231261299133301        
+Epoch 56 - loss: 3.156481761834584e-05, val_loss: 0.008447251930832863, percentage_error: 14.207408317565918
+Epoch 57 - loss: 3.0384999263333157e-05, val_loss: 0.008368755403906107, percentage_error: 14.1190810546875
+Epoch 58 - loss: 3.4391974622849375e-05, val_loss: 0.008380841828882695, percentage_error: 14.132890060424804        
+Epoch 59 - loss: 2.752779982984066e-05, val_loss: 0.008302135288715363, percentage_error: 14.04337181854248
+Reloading data with seed  76
+Epoch 60 - loss: 3.292503606644459e-05, val_loss: 0.008364416155964137, percentage_error: 14.114503524780273
+Epoch 61 - loss: 3.030396328540519e-05, val_loss: 0.008247320298105478, percentage_error: 13.980325393676758
+Epoch 62 - loss: 3.131928315269761e-05, val_loss: 0.008314486090093852, percentage_error: 14.057770263671875
+Epoch 63 - loss: 3.071240280405618e-05, val_loss: 0.008280313350260258, percentage_error: 14.018546913146972
+Epoch 64 - loss: 2.8507765819085762e-05, val_loss: 0.008270456794649363, percentage_error: 14.007229568481446        
+Reloading data with seed  81
+Epoch 65 - loss: 3.206871770089492e-05, val_loss: 0.008054770637303591, percentage_error: 13.75510324859619
+Epoch 66 - loss: 3.2922805985435843e-05, val_loss: 0.008064231179654598, percentage_error: 13.766487091064453        
+Epoch 67 - loss: 3.040058618353214e-05, val_loss: 0.008102023381739855, percentage_error: 13.81146516418457
+Epoch 68 - loss: 3.837328404188156e-05, val_loss: 0.00800861831754446, percentage_error: 13.700234916687013
+Epoch 69 - loss: 3.254111288697459e-05, val_loss: 0.00801461698114872, percentage_error: 13.707529411315917
+Reloading data with seed  86
+Epoch 70 - loss: 3.7465400964720175e-05, val_loss: 0.007992084953933954, percentage_error: 13.680487915039063        
+Epoch 71 - loss: 3.551154804881662e-05, val_loss: 0.00794106301665306, percentage_error: 13.618365348815917
+Epoch 72 - loss: 3.1467032385990024e-05, val_loss: 0.007983150716871024, percentage_error: 13.669814758300781        
+Epoch 73 - loss: 2.8671873224084266e-05, val_loss: 0.007964181765913963, percentage_error: 13.646808135986328        
+Epoch 74 - loss: 3.360527625773102e-05, val_loss: 0.00795109774172306, percentage_error: 13.630867515563965
+Reloading data with seed  91
+Epoch 75 - loss: 3.406478208489716e-05, val_loss: 0.007898058224469423, percentage_error: 13.565452819824218
+Epoch 76 - loss: 2.9832559448550455e-05, val_loss: 0.007868046052753925, percentage_error: 13.527945518493652        
+Epoch 77 - loss: 2.768806734820828e-05, val_loss: 0.00787080055102706, percentage_error: 13.53146775817871
+Epoch 78 - loss: 3.071943501709029e-05, val_loss: 0.007849595088511706, percentage_error: 13.504809539794921
+Epoch 79 - loss: 3.1458010198548436e-05, val_loss: 0.007806381218135357, percentage_error: 13.449964042663574        
+Reloading data with seed  96
+Epoch 80 - loss: 3.6783811083296314e-05, val_loss: 0.00782959035784006, percentage_error: 13.479584907531738
+Epoch 81 - loss: 2.5950834242394194e-05, val_loss: 0.007858176305890084, percentage_error: 13.515795372009277        
+Epoch 82 - loss: 3.546790685504675e-05, val_loss: 0.007804553966969252, percentage_error: 13.447754165649414
+Epoch 83 - loss: 3.3139258448500186e-05, val_loss: 0.007818421937525272, percentage_error: 13.465489463806152        
+Epoch 84 - loss: 2.8081041818950325e-05, val_loss: 0.007762282948940992, percentage_error: 13.393378150939942        
+Reloading data with seed  101
+Epoch 85 - loss: 2.6739522581920028e-05, val_loss: 0.007818141320720316, percentage_error: 13.465198677062988        
+Epoch 86 - loss: 3.133332575089298e-05, val_loss: 0.007774478513747454, percentage_error: 13.409235168457032
+Epoch 87 - loss: 3.165450107189827e-05, val_loss: 0.0077906369045376775, percentage_error: 13.43010450744629
+Epoch 88 - loss: 3.567791645764373e-05, val_loss: 0.007752822581678629, percentage_error: 13.381225364685058
+Epoch 89 - loss: 2.7290883735986426e-05, val_loss: 0.0077348413169384, percentage_error: 13.357813720703126
+Reloading data with seed  106
+Epoch 90 - loss: 2.7980238883174025e-05, val_loss: 0.0077601551823318, percentage_error: 13.390766036987305
+Epoch 91 - loss: 3.407734038773924e-05, val_loss: 0.007753156527876854, percentage_error: 13.381709396362305
+Epoch 92 - loss: 3.363695213920437e-05, val_loss: 0.007781606279313564, percentage_error: 13.418582061767578
+Epoch 93 - loss: 2.6049179723486304e-05, val_loss: 0.0077584185376763344, percentage_error: 13.388553939819335       
+Epoch 94 - loss: 2.950352973130066e-05, val_loss: 0.007744547091424465, percentage_error: 13.370525268554687
+Reloading data with seed  111
+Epoch 95 - loss: 3.1763993320055306e-05, val_loss: 0.007711040630936623, percentage_error: 13.326630752563476        
+Epoch 96 - loss: 3.3918848203029484e-05, val_loss: 0.007732571519911289, percentage_error: 13.354951019287109        
+Epoch 97 - loss: 3.332131382194348e-05, val_loss: 0.0077075232043862345, percentage_error: 13.32203158569336
+Epoch 98 - loss: 3.5276148992124945e-05, val_loss: 0.007692750047892332, percentage_error: 13.302479629516602        
+Epoch 99 - loss: 3.080941314692609e-05, val_loss: 0.0076460841558873656, percentage_error: 13.239692306518554
