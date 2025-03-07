@@ -13,33 +13,28 @@ class PositionalEncoding(nn.Module):
         pe[:, 1::2] = torch.cos(position * div_term)
         pe = pe.unsqueeze(0)
         self.register_buffer('pe', pe)
-
     def forward(self, x):
         x = x + self.pe[:, :x.size(1)]
         return self.dropout(x)
-        
+
 class ChessModel(nn.Module):
     def __init__(self, vocab_size, embed_dim=64, hidden_dim=128, n_layers=2, dropout=0.1, nhead=4):
         super(ChessModel, self).__init__()
-        self.use_transformer = use_transformer
         self.embed = nn.Embedding(vocab_size, embed_dim)
         self.dropout = nn.Dropout(dropout)
         self.positional_encoding = PositionalEncoding(embed_dim, dropout)
-        encoder_layer = nn.TransformerEncoderLayer(d_model=embed_dim, nhead=nhead, dropout=dropout, batch_first=True)
-        self.transformer_encoder = nn.TransformerEncoder(encoder_layer, num_layers=n_layers)
-        self.fc_rating = nn.Linear(embed_dim, 1)
-
+        self.encoder_layer = nn.TransformerEncoderLayer(d_model=embed_dim, nhead=nhead, dropout=dropout, batch_first=False)
+        self.transformer_encoder = nn.TransformerEncoder(self.encoder_layer, num_layers=n_layers)
+        self.lstm = nn.LSTM(embed_dim, hidden_dim, num_layers=n_layers, batch_first=False, dropout=dropout)
+        self.fc_rating = nn.Linear(hidden_dim, 1)
     def forward(self, x):
         x = self.embed(x)
         x = self.dropout(x)
-        if self.use_transformer:
-            x = self.positional_encoding(x)
-            x = x.transpose(0, 1)
-            x = self.transformer_encoder(x)
-            x = x.transpose(0, 1)
-            ratings = self.fc_rating(x)
-        else:
-            output, (h_n, c_n) = self.lstm(x)
-            output = self.dropout(output)
-            ratings = self.fc_rating(output)
+        x = self.positional_encoding(x)
+        x = x.transpose(0, 1)
+        x = self.transformer_encoder(x)
+        x, _ = self.lstm(x)
+        x = self.dropout(x)
+        x = x.transpose(0, 1)
+        ratings = self.fc_rating(x)
         return ratings

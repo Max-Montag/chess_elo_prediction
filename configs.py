@@ -30,6 +30,6 @@ config_b = { # transformer
     "n_layers": 2,
     "mask_prob": 0.15,
     "mask_token": 11116,
-    "weight_decay": 0.00002, # TODO increase!!
+    "weight_decay": 0.00003,
     "nhead": 4
 }
