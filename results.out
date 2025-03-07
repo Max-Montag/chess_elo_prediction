@@ -198,3 +198,42 @@ Epoch 96 - loss: 3.3918848203029484e-05, val_loss: 0.007732571519911289, percent
 Epoch 97 - loss: 3.332131382194348e-05, val_loss: 0.0077075232043862345, percentage_error: 13.32203158569336
 Epoch 98 - loss: 3.5276148992124945e-05, val_loss: 0.007692750047892332, percentage_error: 13.302479629516602        
 Epoch 99 - loss: 3.080941314692609e-05, val_loss: 0.0076460841558873656, percentage_error: 13.239692306518554
+
+############################################################################################################################################################################
+
+# transformer:
+
+config_b = {
+    "name": "b",
+    "seed": 16,
+    "learning_rate": 0.000001,
+    "dataset_size": 40000,
+    "reload_interval": 3,
+    "dropout": 0.25,
+    "num_epochs": 15,
+    "batch_size": 64,
+    "vocab_size": 11117,
+    "embed_dim": 64,
+    "hidden_dim": 128,
+    "n_layers": 2,
+    "mask_prob": 0.2,
+    "mask_token": 11116,
+    "weight_decay": 0.00002,
+    "nhead": 4
+}
+
+wandb:  View run at https://wandb.ai/maxmontag/chess-rating-prediction/runs/zmh7rggy        
+Reloading data with seed  16
+Epoch 0 - loss: 3.25, val_loss: 87.18, percentage_error: 13.03
+Epoch 1 - loss: 2.08, val_loss: 75.65, percentage_error: 12.71
+Epoch 2 - loss: 1.41, val_loss: 77.12, percentage_error: 12.67
+Reloading data with seed  19
+Epoch 3 - loss: 0.97, val_loss: 75.97, percentage_error: 12.69
+Epoch 4 - loss: 0.75, val_loss: 76.09, percentage_error: 12.69
+Epoch 5 - loss: 0.61, val_loss: 75.58, percentage_error: 12.71
+Reloading data with seed  22
+Epoch 6 - loss: 0.54, val_loss: 75.41, percentage_error: 12.75
+Epoch 7 - loss: 0.42, val_loss: 75.31, percentage_error: 12.90
+Epoch 8 - loss: 0.42, val_loss: 75.65, percentage_error: 12.98
+Reloading data with seed  25
+Epoch 9 - loss: 0.35, val_loss: 76.99, percentage_error: 13.25

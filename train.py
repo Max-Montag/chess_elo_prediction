@@ -11,7 +11,7 @@ from chess_model import ChessModel
 from configs import *
 from masking import mask_batch
 
-current_config = config_a
+current_config = config_b
 wandb.init(project="chess-rating-prediction", config=current_config)
 
 data_full = pd.read_csv("data/split_data_prepared/set_1_normalized.csv")
@@ -21,14 +21,15 @@ model = ChessModel(vocab_size=wandb.config.vocab_size,
                    embed_dim=wandb.config.embed_dim,
                    hidden_dim=wandb.config.hidden_dim,
                    n_layers=wandb.config.n_layers,
-                   dropout=wandb.config.dropout
+                   dropout=wandb.config.dropout,
+                   nhead=wandb.config.nhead,
                    ).to(device)
 # wandb.watch(model, log="all")
 criterion_mse = nn.MSELoss()
 optimizer = torch.optim.Adam(model.parameters(), lr=wandb.config.learning_rate, weight_decay=wandb.config.weight_decay)
 
 # data = data_full.sample(n=wandb.config.dataset_size, random_state=wandb.config.seed).reset_index(drop=True)
-df, df_val = train_test_split(data_full, test_size=0.01, random_state=wandb.config.seed)  # USE SET 5 FOR TESTING!
+df, df_val = train_test_split(data_full, test_size=0.01, random_state=wandb.config.seed)  # TODO USE SET 5 FOR TESTING!
 
 sequences_val = [torch.tensor(ast.literal_eval(seq), dtype=torch.long) for seq in df_val["moves_encoded"]]
 X_val = pad_sequence(sequences_val, batch_first=True, padding_value=0)
@@ -53,14 +54,12 @@ def reload_data(data_full, seed):
 data_loader = reload_data(data_full, wandb.config.seed)
 
 best_val_loss = float('inf')
-patience = wandb.config.patience
-epochs_without_improvement = 0
+reload_interval = wandb.config.reload_interval
 
 # train loop
 for epoch in range(wandb.config.num_epochs):
-    if epochs_without_improvement >= patience:
+    if epoch % reload_interval == 0 and epoch != 0:
         data_loader = reload_data(data_full, wandb.config.seed + epoch)
-        epochs_without_improvement = 0
 
     loss = 0.0
     for X_batch, ratings_batch in data_loader:
@@ -99,13 +98,7 @@ for epoch in range(wandb.config.num_epochs):
     avg_percentage_error = percentage_error_sum / ratings_val.numel()
     avg_val_loss = loss_val / len(val_data_loader)
     wandb.log({"loss_val": avg_val_loss, "percentage_error": avg_percentage_error})
-    print(f"Epoch {epoch} - loss: {avg_loss*100:.2f}, val_loss: {avg_val_loss*100:.2f}, percentage_error: {avg_percentage_error:.2f}")
-
-    if avg_val_loss < best_val_loss:
-        best_val_loss = avg_val_loss
-        epochs_without_improvement = 0
-    else:
-        epochs_without_improvement += 1
+    print(f"Epoch {epoch} - loss: {avg_loss*10000:.2f}, val_loss: {avg_val_loss*10000:.2f}, percentage_error: {avg_percentage_error:.2f}")
 
 # save model
 i = 0
