@@ -5,6 +5,8 @@ metric:
   goal: minimize
   name: val_loss
 parameters:
+  name:
+    values: [sweep_1]
   learning_rate:
     min: 0.00000005
     max: 0.00000015
@@ -32,7 +34,7 @@ parameters:
   dataset_size:
     values: [10000]
   num_epochs:
-    values: [50]
+    values: [100]
   vocab_size:
     values: [11117]
   mask_token:
