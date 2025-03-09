@@ -36,19 +36,19 @@ config_a = { # lstm
 
 config_b = { # transformer
     "name": "b",
-    "seed": 17,
-    "learning_rate": 0.0000005,
+    "seed": 18,
+    "learning_rate": 0.0000001,
     "dataset_size": 50000,
     "reload_interval": 5,
-    "dropout": 0.45,
-    "num_epochs": 150,
+    "dropout": 0.5,
+    "num_epochs": 20,
     "batch_size": 64,
     "vocab_size": 11117,
-    "embed_dim": 128,
+    "embed_dim": 32,
     # "hidden_dim": 128,
-    "n_layers": 2,
+    "n_layers": 3,
     "mask_prob": 0.35,
     "mask_token": 11116,
-    "weight_decay": 0.00015,
-    "nhead": 8
+    "weight_decay": 0.0003,
+    "nhead": 4
 }
