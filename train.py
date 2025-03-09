@@ -19,7 +19,7 @@ data_full = pd.read_csv("data/split_data_prepared/set_1_normalized.csv")
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 model = ChessModel(vocab_size=wandb.config.vocab_size,
                    embed_dim=wandb.config.embed_dim,
-                   hidden_dim=wandb.config.hidden_dim,
+                #    hidden_dim=wandb.config.hidden_dim,
                    n_layers=wandb.config.n_layers,
                    dropout=wandb.config.dropout,
                    nhead=wandb.config.nhead,
@@ -28,7 +28,7 @@ model = ChessModel(vocab_size=wandb.config.vocab_size,
 criterion_mse = nn.MSELoss()
 optimizer = torch.optim.Adam(model.parameters(), lr=wandb.config.learning_rate, weight_decay=wandb.config.weight_decay)
 
-df_train, df_val = train_test_split(data_full, test_size=0.01, random_state=wandb.config.seed)  # TODO USE SET 5 FOR TESTING!
+df_train, df_val = train_test_split(data_full, test_size=0.004, random_state=wandb.config.seed)  # TODO USE SET 5 FOR TESTING!
 
 sequences_val = [torch.tensor(ast.literal_eval(seq), dtype=torch.long) for seq in df_val["moves_encoded"]]
 X_val = pad_sequence(sequences_val, batch_first=True, padding_value=0)
