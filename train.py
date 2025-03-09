@@ -7,7 +7,7 @@ from sklearn.model_selection import train_test_split
 from torch.nn.utils.rnn import pad_sequence
 from torch.utils.data import DataLoader, TensorDataset
 import wandb
-import yaml
+# import yaml'
 from chess_model import ChessModel
 from masking import mask_batch
 
@@ -24,6 +24,7 @@ model = ChessModel(vocab_size=wandb.config.vocab_size,
                    n_layers=wandb.config.n_layers,
                    dropout=wandb.config.dropout,
                    nhead=wandb.config.nhead,
+                   activation=wandb.config.activation
                    ).to(device)
 # wandb.watch(model, log="all")
 criterion_mse = nn.MSELoss()
