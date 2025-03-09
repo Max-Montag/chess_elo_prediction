@@ -7,19 +7,20 @@ from sklearn.model_selection import train_test_split
 from torch.nn.utils.rnn import pad_sequence
 from torch.utils.data import DataLoader, TensorDataset
 import wandb
+import yaml
 from chess_model import ChessModel
-from configs import *
 from masking import mask_batch
 
-current_config = config_b
-wandb.init(project="chess-rating-prediction", config=current_config)
+# with open("configs/config_b.yaml", "r") as f:
+#     current_config = yaml.safe_load(f)
+# wandb.init(project="chess-rating-prediction", config=current_config)
+wandb.init(project="chess-rating-prediction")
 
 data_full = pd.read_csv("data/split_data_prepared/set_1_normalized.csv")
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 model = ChessModel(vocab_size=wandb.config.vocab_size,
                    embed_dim=wandb.config.embed_dim,
-                #    hidden_dim=wandb.config.hidden_dim,
                    n_layers=wandb.config.n_layers,
                    dropout=wandb.config.dropout,
                    nhead=wandb.config.nhead,
@@ -28,7 +29,7 @@ model = ChessModel(vocab_size=wandb.config.vocab_size,
 criterion_mse = nn.MSELoss()
 optimizer = torch.optim.Adam(model.parameters(), lr=wandb.config.learning_rate, weight_decay=wandb.config.weight_decay)
 
-df_train, df_val = train_test_split(data_full, test_size=0.004, random_state=wandb.config.seed)  # TODO USE SET 5 FOR TESTING!
+df_train, df_val = train_test_split(data_full, test_size=0.01, random_state=wandb.config.seed)  # TODO USE SET 5 FOR TESTING!
 
 sequences_val = [torch.tensor(ast.literal_eval(seq), dtype=torch.long) for seq in df_val["moves_encoded"]]
 X_val = pad_sequence(sequences_val, batch_first=True, padding_value=0)
@@ -53,6 +54,8 @@ def reload_data(data, seed):
 data_loader = reload_data(df_train, wandb.config.seed)
 
 best_val_loss = float('inf')
+best_model_state = None
+early_stopped = False
 reload_interval = wandb.config.reload_interval
 
 # train loop
@@ -71,15 +74,15 @@ for epoch in range(wandb.config.num_epochs):
         pred_ratings = model(X_batch)
 
         seq_len = pred_ratings.shape[1]
-        # weights = torch.linspace(0.1, 1.0, steps=seq_len).to(device) # higher weight for later predictions!
-        # weights = weights.unsqueeze(0).unsqueeze(-1)
-
         loss = criterion_mse(pred_ratings, ratings_batch.unsqueeze(1).expand_as(pred_ratings))
-        # weighted_loss = (loss * weights).mean()
-        # weighted_loss.backward()
-        loss.backward()
+        if wandb.config.use_weighted_loss:
+            weights = torch.linspace(0.1, 1.0, steps=seq_len).to(device)  # higher weight for later predictions!
+            weights = weights.unsqueeze(0).unsqueeze(-1)
+            weighted_loss = (loss * weights).mean()
+            weighted_loss.backward()
+        else:
+            loss.backward()
         optimizer.step()
-        # loss += weighted_loss.item()
         loss += loss.item()
     avg_loss = loss / len(data_loader)
     wandb.log({"loss_total": avg_loss})
@@ -98,14 +101,27 @@ for epoch in range(wandb.config.num_epochs):
         percentage_error_sum += torch.sum(torch.abs(pred_ratings - ratings_batch) / torch.abs(ratings_batch) * 100).item()
     avg_percentage_error = percentage_error_sum / ratings_val.numel()
     avg_val_loss = loss_val / len(val_data_loader)
+    
     wandb.log({"loss_val": avg_val_loss, "percentage_error": avg_percentage_error})
     print(f"Epoch {epoch} - loss: {avg_loss*10000:.2f}, val_loss: {avg_val_loss*10000:.2f}, percentage_error: {avg_percentage_error:.2f}")
+    
+    # early stopping: no improvement -> save best model -> break
+    if avg_val_loss < best_val_loss:
+        best_val_loss = avg_val_loss
+        best_model_state = model.state_dict()
+    else:
+        print(f"Early stopping triggered at epoch {epoch} (val_loss did not improve)")
+        torch.save(best_model_state, f"models/model_{wandb.config.name}_earlystop.pth")
+        print(f"Model saved as model_{wandb.config.name}_earlystop.pth")
+        early_stopped = True
+        break
 
 # save model
-i = 0
-while os.path.exists(f"models/model_{wandb.config.name}_{i}.pth"):
-    i += 1
-torch.save(model.state_dict(), f"models/model_{wandb.config.name}_{i}.pth")
-print(f"Model saved as model_{wandb.config.name}_{i}.pth")
+if not early_stopped:
+    i = 0
+    while os.path.exists(f"models/model_{wandb.config.name}_{i}.pth"):
+        i += 1
+    torch.save(model.state_dict(), f"models/model_{wandb.config.name}_{i}.pth")
+    print(f"Model saved as model_{wandb.config.name}_{i}.pth")
 
 wandb.finish()
