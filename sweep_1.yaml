@@ -40,4 +40,4 @@ parameters:
   nhead:
     values: [4]
   activation:
-    values: ["relu", "gelu", "leaky_relu", "tanh", "sigmoid"]
+    values: ["relu", "gelu"]
