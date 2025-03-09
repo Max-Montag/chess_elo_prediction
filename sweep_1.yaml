@@ -1,24 +1,24 @@
-method: grid
+program: train.py
+name: sweep_1
+method: bayes
 metric:
   goal: minimize
   name: val_loss
 parameters:
   learning_rate:
-    values: [0.00000008, 0.00000009, 0.0000001, 0.00000011, 0.00000012]
+    min: 0.00000005
+    max: 0.00000015
   weight_decay:
-    values: [0.00015, 0.0002, 0.00025, 0.0003, 0.00035, 0.0004]
-    conditional:
-      n_layers:
-        1: [0.00015, 0.0002, 0.00025, 0.0003, 0.00035, 0.0004]
-        2: [0.00015, 0.0002, 0.00025, 0.0003, 0.00035, 0.0004]
-        3: [0.0002, 0.00025, 0.0003, 0.00035, 0.0004]
-        4: [0.00025, 0.0003, 0.00035, 0.0004]
+    min: 0.00015
+    max: 0.0004
   mask_prob:
-    values: [0.3, 0.35, 0.4, 0.45]
+    min: 0.3
+    max: 0.45
   batch_size:
     values: [32, 64]
   dropout:
-    values: [0.3, 0.35, 0.4, 0.45, 0.47, 0.5, 0.52]
+    min: 0.3
+    max: 0.52
   reload_interval:
     values: [1, 2, 3, 4, 5, 7, 10, 15]
   n_layers:
