@@ -10,7 +10,6 @@ parameters:
   learning_rate:
     min: 0.00000005
     max: 0.00000015
-    va
   weight_decay:
     min: 0.00015
     max: 0.0004
