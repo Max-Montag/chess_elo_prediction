@@ -10,8 +10,7 @@ import wandb
 from chess_model import ChessModel
 from masking import mask_batch
 
-# treat a prdiction as correct if the prediction is within 50 rating points of the true rating
-rating_threshold = 50
+rating_threshold = 50 # 50 Elo points (Lichess rating scale) (only for test set evaluation)
 max_rating = 3110
 
 # import yaml'
@@ -33,6 +32,7 @@ df_bal_subset = df_bal_subset.sample(frac=1, random_state=wandb.config.seed).res
 df_bal_subset.drop(columns=["rating_bin"], inplace=True)
 print("balanced subset info", df_bal_subset.info())
 
+# use everything else as test set
 df_test = data_full[~data_full.index.isin(df_bal_subset.index)]
 df_test.reset_index(drop=True, inplace=True)
 df_test.drop(columns=["rating_bin"], inplace=True)
@@ -47,7 +47,18 @@ model = ChessModel(vocab_size=wandb.config.vocab_size,
                    activation=wandb.config.activation
                    ).to(device)
 # wandb.watch(model, log="all")
-criterion_mse = nn.MSELoss()
+
+def get_criterion():
+    if wandb.config.criterion == "MSE":
+        return nn.MSELoss()
+    elif wandb.config.criterion == "L1":
+        return nn.L1Loss()
+    elif wandb.config.criterion == "Smooth_L1":
+        return nn.SmoothL1Loss()
+    elif wandb.config.criterion == "Huber":
+        return nn.HuberLoss(reduction='mean', delta=1.0)
+
+criterion = get_criterion()
 optimizer = torch.optim.Adam(model.parameters(), lr=wandb.config.learning_rate, weight_decay=wandb.config.weight_decay)
 
 df_train, df_val = train_test_split(data_full, test_size=0.2, random_state=wandb.config.seed)
@@ -95,7 +106,7 @@ for epoch in range(wandb.config.num_epochs):
         pred_ratings = model(X_batch)
 
         seq_len = pred_ratings.shape[1]
-        loss = criterion_mse(pred_ratings, ratings_batch.unsqueeze(1).expand_as(pred_ratings))
+        loss = criterion(pred_ratings, ratings_batch.unsqueeze(1).expand_as(pred_ratings))
         if wandb.config.use_weighted_loss:
             weights = torch.linspace(0.1, 1.0, steps=seq_len).to(device)  # higher weight for later predictions!
             weights = weights.unsqueeze(0).unsqueeze(-1)
@@ -117,7 +128,7 @@ for epoch in range(wandb.config.num_epochs):
         model.eval()
         pred_ratings_seq = model(X_batch)
         pred_ratings = pred_ratings_seq[:, -1, :]
-        loss = criterion_mse(pred_ratings, ratings_batch)
+        loss = criterion(pred_ratings, ratings_batch)
         loss_val += loss.item()
         percentage_error_sum += torch.sum(torch.abs(pred_ratings - ratings_batch) / torch.abs(ratings_batch) * 100).item()
     avg_percentage_error = percentage_error_sum / ratings_val.numel()
@@ -163,7 +174,7 @@ for X_batch, ratings_batch in test_data_loader:
     ratings_batch = ratings_batch.to(device)
     pred_ratings_seq = model(X_batch)
     pred_ratings = pred_ratings_seq[:, -1, :]
-    loss = criterion_mse(pred_ratings, ratings_batch)
+    loss = criterion(pred_ratings, ratings_batch)
     loss_test += loss.item()
     percentage_error_sum += torch.sum(torch.abs(pred_ratings - ratings_batch) / torch.abs(ratings_batch) * 100).item()
     correct = torch.abs(pred_ratings - ratings_batch) * max_rating < rating_threshold
