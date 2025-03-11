@@ -7,16 +7,36 @@ from sklearn.model_selection import train_test_split
 from torch.nn.utils.rnn import pad_sequence
 from torch.utils.data import DataLoader, TensorDataset
 import wandb
-# import yaml'
 from chess_model import ChessModel
 from masking import mask_batch
 
+# treat a prdiction as correct if the prediction is within 50 rating points of the true rating
+rating_threshold = 50
+max_rating = 3110
+
+# import yaml'
 # with open("configs/config_b.yaml", "r") as f:
 #     current_config = yaml.safe_load(f)
 # wandb.init(project="chess-rating-prediction", config=current_config)
+
 wandb.init(project="chess-rating-prediction")
 
-data_full = pd.read_csv("data/split_data_prepared/set_1_normalized.csv")
+data_full = pd.read_csv("data/final_normalized.csv")
+
+# balance dataset
+data_full["rating_bin"] = pd.cut(data_full["white_rating_scaled"], bins=wandb.config.bins, labels=False)
+groups = data_full.groupby("rating_bin")
+min_count = groups.size().min()
+
+df_bal_subset = groups.apply(lambda x: x.sample(min_count, random_state=wandb.config.seed)).reset_index(drop=True)
+df_bal_subset = df_bal_subset.sample(frac=1, random_state=wandb.config.seed).reset_index(drop=True)
+df_bal_subset.drop(columns=["rating_bin"], inplace=True)
+print("balanced subset info", df_bal_subset.info())
+
+df_test = data_full[~data_full.index.isin(df_bal_subset.index)]
+df_test.reset_index(drop=True, inplace=True)
+df_test.drop(columns=["rating_bin"], inplace=True)
+print("test set info", df_test.info())
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 model = ChessModel(vocab_size=wandb.config.vocab_size,
@@ -30,7 +50,7 @@ model = ChessModel(vocab_size=wandb.config.vocab_size,
 criterion_mse = nn.MSELoss()
 optimizer = torch.optim.Adam(model.parameters(), lr=wandb.config.learning_rate, weight_decay=wandb.config.weight_decay)
 
-df_train, df_val = train_test_split(data_full, test_size=0.01, random_state=wandb.config.seed)  # TODO USE SET 5 FOR TESTING!
+df_train, df_val = train_test_split(data_full, test_size=0.2, random_state=wandb.config.seed)
 
 sequences_val = [torch.tensor(ast.literal_eval(seq), dtype=torch.long) for seq in df_val["moves_encoded"]]
 X_val = pad_sequence(sequences_val, batch_first=True, padding_value=0)
@@ -124,5 +144,34 @@ if not early_stopped:
         i += 1
     torch.save(model.state_dict(), f"models/model_{wandb.config.name}_{i}.pth")
     print(f"Model saved as model_{wandb.config.name}_{i}.pth")
+
+# run evaluation on test set
+model.load_state_dict(best_model_state)
+model.eval()
+sequences_test = [torch.tensor(ast.literal_eval(seq), dtype=torch.long) for seq in df_test["moves_encoded"]]
+X_test = pad_sequence(sequences_test, batch_first=True, padding_value=0)
+ratings_test = torch.tensor(df_test["white_rating_scaled"].values, dtype=torch.float).unsqueeze(1)
+
+test_dataset = TensorDataset(X_test, ratings_test)
+test_data_loader = DataLoader(test_dataset, batch_size=wandb.config.batch_size, shuffle=True)
+
+loss_test = 0.0
+percentage_error_sum = 0
+accuracy_sum = 0
+for X_batch, ratings_batch in test_data_loader:
+    X_batch = X_batch.to(device)
+    ratings_batch = ratings_batch.to(device)
+    pred_ratings_seq = model(X_batch)
+    pred_ratings = pred_ratings_seq[:, -1, :]
+    loss = criterion_mse(pred_ratings, ratings_batch)
+    loss_test += loss.item()
+    percentage_error_sum += torch.sum(torch.abs(pred_ratings - ratings_batch) / torch.abs(ratings_batch) * 100).item()
+    correct = torch.abs(pred_ratings - ratings_batch) * max_rating < rating_threshold
+    accuracy_sum = torch.sum(correct).item() / ratings_batch.numel()
+avg_percentage_error = percentage_error_sum / ratings_test.numel()
+avg_accuracy = accuracy_sum / len(test_data_loader)
+avg_test_loss = loss_test / len(test_data_loader)
+wandb.log({"loss_test": avg_test_loss, "percentage_error_test": avg_percentage_error, "accuracy_test": avg_accuracy})
+print(f"Test loss: {avg_test_loss*10000:.2f}, percentage_error: {avg_percentage_error:.2f}, accuracy: {avg_accuracy:.2f}")
 
 wandb.finish()

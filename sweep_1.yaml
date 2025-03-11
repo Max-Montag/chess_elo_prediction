@@ -1,45 +1,47 @@
 program: train.py
-name: sweep_1
+name: sweep_2
 method: random
 metric:
   goal: minimize
   name: loss_val
 parameters:
   name:
-    values: ["sweep_1"]
+    values: ["sweep_2"]
   learning_rate:
-    min: 0.00000005
-    max: 0.00000015
+    min: 0.00000008
+    max: 0.00000011
   weight_decay:
-    min: 0.00015
-    max: 0.0004
+    min: 0.0002
+    max: 0.0003
   mask_prob:
-    min: 0.3
+    min: 0.35
     max: 0.45
   batch_size:
     values: [32, 64]
   dropout:
-    min: 0.3
+    min: 0.1
     max: 0.52
   reload_interval:
-    values: [1, 2, 3, 4, 5, 7, 10, 15]
+    values: [5, 10, 15, 20]
   n_layers:
-    values: [1, 2, 3, 4]
+    values: [2]
   embed_dim:
-    values: [16, 32, 64, 128]
+    values: [64]
   use_weighted_loss:
     values: [true, false]
   seed:
-    values: [18]
+    values: [18,19,20]
   dataset_size:
     values: [10000]
   num_epochs:
-    values: [100]
+    values: [150]
   vocab_size:
-    values: [11117]
+    values: [7384]
   mask_token:
-    values: [11116]
+    values: [7383]
   nhead:
     values: [4]
   activation:
-    values: ["relu", "gelu"]
+    values: ["gelu"]
+  bins:
+    values: [2,3,4]
